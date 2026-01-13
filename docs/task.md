@@ -9,7 +9,7 @@
   - [x] デプロイ先決定（GitHub Pages）
   - [x] 技術選定ドキュメント作成
 - [x] SvelteKitプロジェクト初期化
-- [ ] PWA設定
+- [x] PWA設定
 - [ ] GitHub Pages デプロイ設定
 
 ## フェーズ2: UI基盤
