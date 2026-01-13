@@ -1,0 +1,287 @@
+/* ========================================
+   Aether Console - SF風デザインシステム
+   ======================================== */
+
+/* ----------------------------------------
+   CSS Variables
+   ---------------------------------------- */
+:root {
+	/* Colors - Deep Space Theme */
+	--color-bg-primary: #0a0a1a;
+	--color-bg-secondary: #0f0f2a;
+	--color-bg-panel: rgba(15, 15, 42, 0.8);
+	--color-bg-panel-hover: rgba(20, 20, 50, 0.9);
+
+	/* Accent Colors */
+	--color-cyan: #00ffff;
+	--color-cyan-dim: #00aaaa;
+	--color-blue: #00aaff;
+	--color-green: #00ff88;
+	--color-orange: #ff6b35;
+	--color-red: #ff3366;
+
+	/* Text */
+	--color-text: #e0e0e0;
+	--color-text-dim: #888888;
+	--color-text-bright: #ffffff;
+
+	/* Borders */
+	--color-border: rgba(0, 255, 255, 0.3);
+	--color-border-bright: rgba(0, 255, 255, 0.6);
+
+	/* Shadows & Glows */
+	--glow-cyan: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3);
+	--glow-cyan-strong: 0 0 10px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.5), 0 0 50px rgba(0, 255, 255, 0.3);
+
+	/* Typography */
+	--font-primary: 'Rajdhani', 'Orbitron', 'Segoe UI', sans-serif;
+	--font-mono: 'Fira Code', 'JetBrains Mono', monospace;
+
+	/* Spacing */
+	--space-xs: 0.25rem;
+	--space-sm: 0.5rem;
+	--space-md: 1rem;
+	--space-lg: 1.5rem;
+	--space-xl: 2rem;
+	--space-2xl: 3rem;
+
+	/* Border Radius */
+	--radius-sm: 2px;
+	--radius-md: 4px;
+	--radius-lg: 8px;
+
+	/* Transitions */
+	--transition-fast: 150ms ease;
+	--transition-normal: 300ms ease;
+	--transition-slow: 500ms ease;
+}
+
+/* ----------------------------------------
+   Global Reset & Base
+   ---------------------------------------- */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	font-size: 16px;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+body {
+	font-family: var(--font-primary);
+	background-color: var(--color-bg-primary);
+	color: var(--color-text);
+	line-height: 1.6;
+	min-height: 100vh;
+	overflow-x: hidden;
+}
+
+/* ----------------------------------------
+   Scanlines Overlay
+   ---------------------------------------- */
+.scanlines::before {
+	content: '';
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 9999;
+	background: repeating-linear-gradient(
+		0deg,
+		rgba(0, 0, 0, 0.1) 0px,
+		rgba(0, 0, 0, 0.1) 1px,
+		transparent 1px,
+		transparent 2px
+	);
+	opacity: 0.3;
+}
+
+/* ----------------------------------------
+   Typography
+   ---------------------------------------- */
+h1, h2, h3, h4, h5, h6 {
+	font-family: var(--font-primary);
+	font-weight: 600;
+	color: var(--color-text-bright);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+
+/* ----------------------------------------
+   Glow Effects
+   ---------------------------------------- */
+.glow {
+	text-shadow: var(--glow-cyan);
+}
+
+.glow-strong {
+	text-shadow: var(--glow-cyan-strong);
+}
+
+.glow-box {
+	box-shadow: var(--glow-cyan);
+}
+
+/* ----------------------------------------
+   Panel Base Styles
+   ---------------------------------------- */
+.panel {
+	background: var(--color-bg-panel);
+	border: 1px solid var(--color-border);
+	position: relative;
+	backdrop-filter: blur(10px);
+	transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.panel:hover {
+	border-color: var(--color-border-bright);
+	box-shadow: var(--glow-cyan);
+}
+
+/* Corner Cut Effect */
+.panel-corner {
+	clip-path: polygon(
+		0 10px,
+		10px 0,
+		100% 0,
+		100% calc(100% - 10px),
+		calc(100% - 10px) 100%,
+		0 100%
+	);
+}
+
+.panel-corner::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	border: 1px solid var(--color-border);
+	clip-path: inherit;
+	pointer-events: none;
+}
+
+/* ----------------------------------------
+   Animations
+   ---------------------------------------- */
+@keyframes pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.5; }
+}
+
+@keyframes glow-pulse {
+	0%, 100% { 
+		box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+	}
+	50% { 
+		box-shadow: 0 0 15px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.4);
+	}
+}
+
+@keyframes glitch {
+	0%, 100% {
+		transform: translate(0);
+		text-shadow: var(--glow-cyan);
+	}
+	20% {
+		transform: translate(-2px, 2px);
+		text-shadow: -2px 0 var(--color-red), 2px 0 var(--color-cyan);
+	}
+	40% {
+		transform: translate(2px, -2px);
+		text-shadow: 2px 0 var(--color-red), -2px 0 var(--color-cyan);
+	}
+	60% {
+		transform: translate(-1px, 1px);
+		text-shadow: -1px 0 var(--color-red), 1px 0 var(--color-cyan);
+	}
+	80% {
+		transform: translate(1px, -1px);
+		text-shadow: 1px 0 var(--color-red), -1px 0 var(--color-cyan);
+	}
+}
+
+.animate-pulse {
+	animation: pulse 2s infinite;
+}
+
+.animate-glow-pulse {
+	animation: glow-pulse 2s infinite;
+}
+
+/* ----------------------------------------
+   Utility Classes
+   ---------------------------------------- */
+.text-cyan { color: var(--color-cyan); }
+.text-blue { color: var(--color-blue); }
+.text-green { color: var(--color-green); }
+.text-orange { color: var(--color-orange); }
+.text-red { color: var(--color-red); }
+.text-dim { color: var(--color-text-dim); }
+
+.font-mono { font-family: var(--font-mono); }
+
+.border-glow {
+	border: 1px solid var(--color-border-bright);
+	box-shadow: var(--glow-cyan);
+}
+
+/* ----------------------------------------
+   Layout Utilities
+   ---------------------------------------- */
+.container {
+	width: 100%;
+	max-width: 1400px;
+	margin: 0 auto;
+	padding: 0 var(--space-lg);
+}
+
+.grid {
+	display: grid;
+	gap: var(--space-md);
+}
+
+.flex {
+	display: flex;
+}
+
+.flex-center {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* ----------------------------------------
+   Scrollbar Styling
+   ---------------------------------------- */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--color-border);
+	border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--color-border-bright);
+}
