@@ -10,12 +10,40 @@ SF風のAIオペレーションルーム — 複数のAIエージェントを可
 - Spec-Kitで各AIの役割を定義
 - AI同士が協調・会話し、結果を提示
 
+## 技術スタック
+
+- **SvelteKit** + **TypeScript**
+- **Vite** (ビルドツール)
+- **Vanilla CSS** (スタイリング)
+- **GitHub Pages** (デプロイ)
+
+## 開発
+
+```bash
+# 開発サーバー起動
+npm run dev
+
+# ビルド
+npm run build
+
+# プレビュー
+npm run preview
+```
+
 ## プロジェクト構造
 
 ```
-.agent/workflows/     # Antigravityワークフロー
-docs/                 # 設計ドキュメント・計画
-src/                  # ソースコード（予定）
+src/
+├── lib/          # 共有コンポーネント・ユーティリティ
+├── routes/       # ページ・ルーティング
+└── app.html      # HTMLテンプレート
+
+docs/
+├── task.md               # タスクリスト
+├── tech_stack.md         # 技術選定ドキュメント
+└── development_workflow.md  # 開発フロー
+
+.agent/workflows/         # Antigravityワークフロー
 ```
 
 ## ワークフローコマンド
@@ -26,8 +54,8 @@ src/                  # ソースコード（予定）
 | `/publish` | GitHubへ公開 |
 | `/review-feedback` | 外部AIレビュー結果を取り込む |
 | `/export-context` | repomixでエクスポート |
-| `/setup-dual-remote` | Dual Remote設定 |
 
-## 開発フロー
+## ドキュメント
 
-詳細は [docs/development_workflow.md](docs/development_workflow.md) を参照。
+- [技術選定](docs/tech_stack.md)
+- [開発フロー](docs/development_workflow.md)
