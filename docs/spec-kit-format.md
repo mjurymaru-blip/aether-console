@@ -60,6 +60,14 @@ spec:
     canReceiveFrom:
       - planner
       - monitor
+
+  # Aether Consoleへの公開設定
+  observability:
+    expose:
+      - status
+      - progress
+      - metrics.errorRate
+    logLevel: info
 ```
 
 ---

@@ -21,6 +21,10 @@
 
 - バックエンドが必要になった場合 → Vercel/Cloudflare Pages への移行を検討
 - Spec-Flow Studio との連携 → 同一技術スタックで統一
+- **Phase 2**: スキーマ検証に `zod` または `valibot` を導入検討
+  - 「仕様が壊れたときにどう壊れたか」をUIに表示可能に
+- **将来**: テーマモード切替（`--theme-mode: ops | design`）
+  - Aether = 派手（ops）、Spec-Flow = 抑制（design）
 
 ## 参考
 
