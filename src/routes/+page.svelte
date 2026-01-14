@@ -7,6 +7,8 @@
 	import MessageFlow from '$lib/components/MessageFlow.svelte';
 	import SpecPatcher from '$lib/components/SpecPatcher.svelte';
 	import DiffVisualizer from '$lib/components/DiffVisualizer.svelte';
+	import AgentChat from '$lib/components/AgentChat.svelte';
+	import ApiKeyDialog from '$lib/components/ApiKeyDialog.svelte';
 	import { agentStore, logStore } from '$lib/stores/simulation';
 
 	// Store から状態を取得
@@ -17,25 +19,35 @@
 	let activeCount = $derived(agents.filter(a => a.state.status === 'active').length);
 	let warningCount = $derived(agents.filter(a => a.state.status === 'warning').length);
 	let errorCount = $derived(agents.filter(a => a.state.status === 'error' || a.state.status === 'offline').length);
+
+	// 設定ダイアログ
+	let showSettings = $state(false);
+
+	function handleSettingsClick() {
+		showSettings = true;
+	}
+
+	function handleSettingsClose() {
+		showSettings = false;
+	}
+
+	function handleKeySet() {
+		// APIキーが設定されたらUIを更新
+	}
 </script>
 
-<ConsoleLayout>
+<ConsoleLayout onSettingsClick={handleSettingsClick}>
 	<div class="dashboard-grid">
 		<!-- Left Column -->
 		<section class="left-column">
-			<!-- Scenario Player -->
-			<Panel title="SCENARIO PLAYER" variant="corner" glow>
-				<ScenarioPlayer />
+			<!-- AI Chat -->
+			<Panel title="AI AGENT CHAT" variant="corner" glow>
+				<AgentChat />
 			</Panel>
 
 			<!-- Spec Patcher -->
-			<Panel title="SPEC PATCHER" variant="corner">
+			<Panel title="SPEC PATCHER">
 				<SpecPatcher />
-			</Panel>
-
-			<!-- Diff Visualizer -->
-			<Panel title="APPLIED CHANGES">
-				<DiffVisualizer />
 			</Panel>
 		</section>
 
@@ -86,23 +98,32 @@
 
 		<!-- Right Column -->
 		<section class="right-column">
-			<!-- Message Flow -->
-			<Panel title="AGENT COMMUNICATION">
-				<MessageFlow />
+			<!-- Scenario Player -->
+			<Panel title="SCENARIO PLAYER">
+				<ScenarioPlayer />
+			</Panel>
+
+			<!-- Applied Changes -->
+			<Panel title="APPLIED CHANGES">
+				<DiffVisualizer />
 			</Panel>
 
 			<!-- Console Output -->
 			<Panel title="CONSOLE OUTPUT" variant="minimal">
-				<ConsoleLog {logs} maxHeight="300px" />
+				<ConsoleLog {logs} maxHeight="200px" />
 			</Panel>
 		</section>
 	</div>
 </ConsoleLayout>
 
+{#if showSettings}
+	<ApiKeyDialog onClose={handleSettingsClose} onKeySet={handleKeySet} />
+{/if}
+
 <style>
 	.dashboard-grid {
 		display: grid;
-		grid-template-columns: 320px 1fr 320px;
+		grid-template-columns: 380px 1fr 320px;
 		gap: var(--space-lg);
 		height: 100%;
 	}

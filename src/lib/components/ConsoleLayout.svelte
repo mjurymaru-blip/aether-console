@@ -9,9 +9,10 @@
 	interface Props {
 		title?: string;
 		subtitle?: string;
+		onSettingsClick?: () => void;
 	}
 
-	let { title = 'AETHER CONSOLE', subtitle = 'AI Operations Command Center', children } = $props<Props>();
+	let { title = 'AETHER CONSOLE', subtitle = 'AI Operations Command Center', onSettingsClick, children } = $props<Props>();
 
 	// 現在時刻（リアルタイム更新）
 	let currentTime = $state(new Date());
@@ -46,6 +47,9 @@
 			<p class="subtitle">{subtitle}</p>
 		</div>
 		<div class="topbar-right">
+			<button class="settings-btn" onclick={() => onSettingsClick?.()}>
+				⚙️
+			</button>
 			<div class="datetime">
 				<span class="time">{formatTime(currentTime)}</span>
 				<span class="date">{formatDate(currentTime)}</span>
@@ -127,6 +131,23 @@
 	.topbar-right {
 		display: flex;
 		justify-content: flex-end;
+		align-items: center;
+		gap: var(--space-md);
+	}
+
+	.settings-btn {
+		background: transparent;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		padding: var(--space-xs) var(--space-sm);
+		cursor: pointer;
+		font-size: 1rem;
+		transition: all var(--transition-fast);
+	}
+
+	.settings-btn:hover {
+		border-color: var(--color-cyan);
+		box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
 	}
 
 	/* System Status */
