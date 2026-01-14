@@ -10,7 +10,7 @@
 - [x] 技術スタック選定（SvelteKit + TypeScript）
 - [x] SvelteKitプロジェクト初期化
 - [x] PWA設定
-- [ ] GitHub Pages デプロイ設定
+- [x] GitHub Pages デプロイ設定
 
 ### UI基盤
 - [x] SF風デザインシステム構築
