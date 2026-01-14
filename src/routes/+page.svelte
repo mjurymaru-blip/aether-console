@@ -5,12 +5,13 @@
 	import Panel from '$lib/components/Panel.svelte';
 	import ScenarioPlayer from '$lib/components/ScenarioPlayer.svelte';
 	import MessageFlow from '$lib/components/MessageFlow.svelte';
-	import { agentStore, logStore, simulationStore } from '$lib/stores/simulation';
+	import SpecPatcher from '$lib/components/SpecPatcher.svelte';
+	import DiffVisualizer from '$lib/components/DiffVisualizer.svelte';
+	import { agentStore, logStore } from '$lib/stores/simulation';
 
 	// Store から状態を取得
 	let agents = $derived($agentStore);
 	let logs = $derived($logStore);
-	let simulation = $derived($simulationStore);
 
 	// アクティブなエージェント数
 	let activeCount = $derived(agents.filter(a => a.state.status === 'active').length);
@@ -20,26 +21,27 @@
 
 <ConsoleLayout>
 	<div class="dashboard-grid">
-		<!-- Left Column: Scenario Player + Message Flow -->
+		<!-- Left Column -->
 		<section class="left-column">
 			<!-- Scenario Player -->
 			<Panel title="SCENARIO PLAYER" variant="corner" glow>
 				<ScenarioPlayer />
 			</Panel>
 
-			<!-- Message Flow -->
-			<Panel title="AGENT COMMUNICATION">
-				<MessageFlow />
+			<!-- Spec Patcher -->
+			<Panel title="SPEC PATCHER" variant="corner">
+				<SpecPatcher />
 			</Panel>
 
-			<!-- Console Output -->
-			<Panel title="CONSOLE OUTPUT" variant="minimal">
-				<ConsoleLog {logs} maxHeight="200px" />
+			<!-- Diff Visualizer -->
+			<Panel title="APPLIED CHANGES">
+				<DiffVisualizer />
 			</Panel>
 		</section>
 
-		<!-- Right Column: Agent Cards -->
-		<section class="right-column">
+		<!-- Center Column -->
+		<section class="center-column">
+			<!-- Agent Cards -->
 			<Panel title="AGENT STATUS" variant="corner">
 				<div class="agents-grid">
 					{#each agents as agent}
@@ -81,19 +83,39 @@
 				</div>
 			</Panel>
 		</section>
+
+		<!-- Right Column -->
+		<section class="right-column">
+			<!-- Message Flow -->
+			<Panel title="AGENT COMMUNICATION">
+				<MessageFlow />
+			</Panel>
+
+			<!-- Console Output -->
+			<Panel title="CONSOLE OUTPUT" variant="minimal">
+				<ConsoleLog {logs} maxHeight="300px" />
+			</Panel>
+		</section>
 	</div>
 </ConsoleLayout>
 
 <style>
 	.dashboard-grid {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: 320px 1fr 320px;
 		gap: var(--space-lg);
 		height: 100%;
 	}
 
 	/* Left Column */
 	.left-column {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-lg);
+	}
+
+	/* Center Column */
+	.center-column {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-lg);
@@ -109,7 +131,7 @@
 	/* Agents Grid */
 	.agents-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		grid-template-columns: repeat(2, 1fr);
 		gap: var(--space-md);
 	}
 
@@ -142,8 +164,36 @@
 	}
 
 	/* Responsive */
-	@media (max-width: 1200px) {
+	@media (max-width: 1400px) {
 		.dashboard-grid {
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.left-column {
+			grid-column: 1 / 2;
+		}
+
+		.center-column {
+			grid-column: 2 / 3;
+		}
+
+		.right-column {
+			grid-column: 1 / 3;
+		}
+	}
+
+	@media (max-width: 1024px) {
+		.dashboard-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.left-column,
+		.center-column,
+		.right-column {
+			grid-column: 1;
+		}
+
+		.agents-grid {
 			grid-template-columns: 1fr;
 		}
 
