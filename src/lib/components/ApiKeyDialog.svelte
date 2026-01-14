@@ -12,6 +12,7 @@
 		hasEncryptedApiKey,
 		hasSessionApiKey
 	} from '$lib/stores/crypto-store';
+	import { settingsStore } from '$lib/stores/settings-store';
 
 	interface Props {
 		onClose: () => void;
@@ -58,6 +59,9 @@
 			const encrypted = await encrypt(apiKey.trim(), password);
 			saveEncryptedApiKey(encrypted);
 			setSessionApiKey(apiKey.trim());
+			settingsStore.setApiKeyReady(true);
+			// モデル一覧を取得
+			await settingsStore.loadModels();
 			mode = 'ready';
 			onKeySet();
 		} catch (e) {
@@ -85,6 +89,9 @@
 		try {
 			const decryptedKey = await decrypt(encryptedData, password);
 			setSessionApiKey(decryptedKey);
+			settingsStore.setApiKeyReady(true);
+			// モデル一覧を取得
+			await settingsStore.loadModels();
 			mode = 'ready';
 			onKeySet();
 		} catch {
@@ -97,6 +104,7 @@
 	function handleClear() {
 		if (confirm('APIキーを削除しますか？この操作は取り消せません。')) {
 			clearApiKey();
+			settingsStore.setApiKeyReady(false);
 			mode = 'input';
 			apiKey = '';
 			password = '';

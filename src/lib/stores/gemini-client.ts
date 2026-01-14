@@ -61,7 +61,8 @@ export function isApiKeyAvailable(): boolean {
 export async function callGemini(
     messages: AgentMessage[],
     config: AgentConfig,
-    model: string = DEFAULT_MODEL
+    model: string = DEFAULT_MODEL,
+    signal?: AbortSignal
 ): Promise<string> {
     const apiKey = getSessionApiKey();
     if (!apiKey) {
@@ -94,7 +95,8 @@ export async function callGemini(
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(request)
+            body: JSON.stringify(request),
+            signal
         }
     );
 

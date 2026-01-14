@@ -2,20 +2,24 @@
   AgentChat.svelte - エージェントとのチャットパネル
 -->
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { agentExecutor } from '$lib/stores/agent-executor';
 	import { agentStore } from '$lib/stores/simulation';
-	import { isApiKeyAvailable } from '$lib/stores/gemini-client';
+	import { settingsStore } from '$lib/stores/settings-store';
 
 	let agents = $derived($agentStore);
 	let executorState = $derived($agentExecutor);
+	let settings = $derived($settingsStore);
 
 	let selectedAgent = $state('analyzer');
 	let userInput = $state('');
-	let isApiReady = $state(false);
 
-	// APIキーの状態を定期的にチェック
-	$effect(() => {
-		isApiReady = isApiKeyAvailable();
+	// クライアント側で初期化＋モデル一覧取得
+	onMount(async () => {
+		settingsStore.init();
+		if (settings.apiKeyReady && settings.availableModels.length === 0) {
+			await settingsStore.loadModels();
+		}
 	});
 
 	async function handleSubmit() {
@@ -25,7 +29,7 @@
 		userInput = '';
 
 		try {
-			await agentExecutor.execute(selectedAgent, input);
+			await agentExecutor.execute(selectedAgent, input, settings.selectedModel);
 		} catch (error) {
 			// エラーはstore経由で表示
 		}
@@ -40,18 +44,37 @@
 </script>
 
 <div class="agent-chat">
-	{#if !isApiReady}
+	{#if !settings.apiKeyReady}
 		<div class="api-notice">
 			<span class="icon">🔑</span>
 			<p>AIエージェントを使用するにはAPIキーを設定してください</p>
+			<small>右上の ⚙️ ボタンから設定</small>
 		</div>
 	{:else}
 		<div class="chat-header">
-			<select bind:value={selectedAgent} disabled={executorState.isRunning}>
-				{#each agents as agent}
-					<option value={agent.name}>{agent.displayName} - {agent.description}</option>
-				{/each}
-			</select>
+			<div class="row">
+				<select class="agent-select" bind:value={selectedAgent} disabled={executorState.isRunning}>
+					{#each agents as agent}
+						<option value={agent.name}>{agent.displayName}</option>
+					{/each}
+				</select>
+				<select 
+					class="model-select" 
+					bind:value={settings.selectedModel} 
+					onchange={(e) => settingsStore.setModel((e.target as HTMLSelectElement).value)}
+					disabled={executorState.isRunning || settings.isLoadingModels}
+				>
+					{#if settings.isLoadingModels}
+						<option>読込中...</option>
+					{:else if settings.availableModels.length === 0}
+						<option>モデルなし</option>
+					{:else}
+						{#each settings.availableModels as model}
+							<option value={model.id}>{model.name}</option>
+						{/each}
+					{/if}
+				</select>
+			</div>
 		</div>
 
 		<div class="chat-response">
@@ -84,13 +107,22 @@
 				placeholder="タスクを入力... (Enter で送信)"
 				disabled={executorState.isRunning}
 			></textarea>
-			<button
-				class="send-btn"
-				onclick={handleSubmit}
-				disabled={!userInput.trim() || executorState.isRunning}
-			>
-				▶
-			</button>
+			{#if executorState.isRunning}
+				<button
+					class="cancel-btn"
+					onclick={() => agentExecutor.cancel()}
+				>
+					⏹
+				</button>
+			{:else}
+				<button
+					class="send-btn"
+					onclick={handleSubmit}
+					disabled={!userInput.trim()}
+				>
+					▶
+				</button>
+			{/if}
 		</div>
 	{/if}
 </div>
@@ -120,14 +152,32 @@
 
 	.api-notice p {
 		font-size: 0.8rem;
+		margin: 0;
+	}
+
+	.api-notice small {
+		font-size: 0.7rem;
+		color: var(--color-cyan);
 	}
 
 	.chat-header {
 		margin-bottom: var(--space-md);
 	}
 
+	.chat-header .row {
+		display: flex;
+		gap: var(--space-sm);
+	}
+
+	.agent-select {
+		flex: 1;
+	}
+
+	.model-select {
+		width: 160px;
+	}
+
 	.chat-header select {
-		width: 100%;
 		padding: var(--space-sm);
 		background: var(--color-bg-primary);
 		border: 1px solid var(--color-border);
@@ -173,6 +223,7 @@
 		gap: var(--space-sm);
 		color: var(--color-red);
 		font-size: 0.8rem;
+		word-break: break-all;
 	}
 
 	.response pre {
@@ -244,5 +295,27 @@
 	.send-btn:disabled {
 		opacity: 0.3;
 		cursor: not-allowed;
+	}
+
+	.cancel-btn {
+		padding: var(--space-sm) var(--space-md);
+		background: rgba(255, 85, 85, 0.2);
+		border: 1px solid var(--color-red);
+		border-radius: var(--radius-sm);
+		color: var(--color-red);
+		cursor: pointer;
+		font-size: 1rem;
+		transition: all var(--transition-fast);
+		animation: pulse-cancel 1s infinite;
+	}
+
+	.cancel-btn:hover {
+		background: rgba(255, 85, 85, 0.3);
+		box-shadow: 0 0 15px rgba(255, 85, 85, 0.4);
+	}
+
+	@keyframes pulse-cancel {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.7; }
 	}
 </style>
