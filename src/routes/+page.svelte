@@ -1,214 +1,217 @@
 <script lang="ts">
+	import ConsoleLayout from '$lib/components/ConsoleLayout.svelte';
+	import AgentCard from '$lib/components/AgentCard.svelte';
+	import ConsoleLog from '$lib/components/ConsoleLog.svelte';
 	import Panel from '$lib/components/Panel.svelte';
-	import GlitchText from '$lib/components/GlitchText.svelte';
-	import StatusIndicator from '$lib/components/StatusIndicator.svelte';
+
+	// モックデータ: エージェント
+	const agents = [
+		{
+			name: 'Analyzer',
+			role: '情報解析',
+			status: 'active' as const,
+			description: '入力データを分析し、パターンや異常を検出',
+			currentTask: 'analyzing-input-001',
+			progress: 0.65,
+			metrics: { tasksCompleted: 42, responseTime: '1.2s', errorRate: 0.02 }
+		},
+		{
+			name: 'Predictor',
+			role: '予測',
+			status: 'idle' as const,
+			description: 'トレンドとリスクを予測し、将来の状態を推定',
+			metrics: { tasksCompleted: 28, responseTime: '2.1s', errorRate: 0.01 }
+		},
+		{
+			name: 'Monitor',
+			role: 'リスク監視',
+			status: 'warning' as const,
+			description: '異常検知とアラート発報を担当',
+			currentTask: 'checking-thresholds',
+			progress: 0.3,
+			metrics: { tasksCompleted: 156, responseTime: '0.5s', errorRate: 0.15 }
+		},
+		{
+			name: 'Planner',
+			role: '計画立案',
+			status: 'offline' as const,
+			description: '次のアクションを提案し、実行計画を作成',
+			metrics: { tasksCompleted: 12, responseTime: '3.5s', errorRate: 0.05 }
+		}
+	];
+
+	// モックデータ: ログ
+	const logs = [
+		{ timestamp: '22:35:01', level: 'info' as const, message: 'System initialized' },
+		{ timestamp: '22:35:02', level: 'success' as const, source: 'Analyzer', message: 'Agent online' },
+		{ timestamp: '22:35:03', level: 'info' as const, source: 'System', message: 'Connecting to Spec-Flow Studio...' },
+		{ timestamp: '22:35:05', level: 'warning' as const, source: 'Monitor', message: 'High error rate detected (15%)' },
+		{ timestamp: '22:35:08', level: 'info' as const, source: 'Analyzer', message: 'Started task: analyzing-input-001' },
+		{ timestamp: '22:35:12', level: 'debug' as const, source: 'Predictor', message: 'Model cache refreshed' },
+		{ timestamp: '22:35:15', level: 'error' as const, source: 'Planner', message: 'Connection timeout - agent offline' },
+		{ timestamp: '22:35:20', level: 'info' as const, message: 'Waiting for input...' }
+	];
 </script>
 
-<div class="console-container">
-	<!-- Header -->
-	<header class="console-header">
-		<GlitchText text="AETHER CONSOLE" tag="h1" intensity="high" />
-		<p class="subtitle">AI Operations Command Center</p>
-	</header>
+<ConsoleLayout>
+	<div class="dashboard-grid">
+		<!-- Agents Section -->
+		<section class="agents-section">
+			<Panel title="AGENT STATUS" variant="corner">
+				<div class="agents-grid">
+					{#each agents as agent}
+						<AgentCard {...agent} />
+					{/each}
+				</div>
+			</Panel>
+		</section>
 
-	<!-- Main Grid -->
-	<main class="console-grid">
-		<!-- Agent Status Panel -->
-		<Panel title="AGENT STATUS">
-			<div class="agent-list">
-				<div class="agent-item">
-					<StatusIndicator status="active" label="Analyzer" size="md" />
-				</div>
-				<div class="agent-item">
-					<StatusIndicator status="idle" label="Predictor" size="md" />
-				</div>
-				<div class="agent-item">
-					<StatusIndicator status="warning" label="Monitor" size="md" />
-				</div>
-				<div class="agent-item">
-					<StatusIndicator status="offline" label="Planner" size="md" />
-				</div>
-			</div>
-		</Panel>
+		<!-- Right Column -->
+		<aside class="sidebar">
+			<!-- Console Output -->
+			<Panel title="CONSOLE OUTPUT" variant="minimal">
+				<ConsoleLog {logs} maxHeight="200px" />
+			</Panel>
 
-		<!-- System Info Panel -->
-		<Panel title="SYSTEM INFO" variant="corner" glow={true}>
-			<div class="system-info">
-				<div class="info-row">
-					<span class="info-label">VERSION</span>
-					<span class="info-value font-mono">0.0.1-alpha</span>
+			<!-- Quick Stats -->
+			<Panel title="SYSTEM METRICS">
+				<div class="metrics-grid">
+					<div class="metric-card">
+						<span class="metric-value text-cyan">4</span>
+						<span class="metric-label">Active Agents</span>
+					</div>
+					<div class="metric-card">
+						<span class="metric-value text-green">238</span>
+						<span class="metric-label">Tasks Today</span>
+					</div>
+					<div class="metric-card">
+						<span class="metric-value text-orange">3</span>
+						<span class="metric-label">Warnings</span>
+					</div>
+					<div class="metric-card">
+						<span class="metric-value text-red">1</span>
+						<span class="metric-label">Errors</span>
+					</div>
 				</div>
-				<div class="info-row">
-					<span class="info-label">UPTIME</span>
-					<span class="info-value font-mono text-green">00:14:32</span>
-				</div>
-				<div class="info-row">
-					<span class="info-label">AGENTS</span>
-					<span class="info-value font-mono text-cyan">4 / 8</span>
-				</div>
-			</div>
-		</Panel>
+			</Panel>
 
-		<!-- Message Panel -->
-		<Panel title="CONSOLE OUTPUT" variant="minimal">
-			<div class="console-output font-mono">
-				<p class="text-dim">[00:00:01] System initialized</p>
-				<p class="text-green">[00:00:02] Analyzer agent online</p>
-				<p class="text-cyan">[00:00:03] Connecting to Spec-Flow Studio...</p>
-				<p class="text-orange">[00:00:05] Warning: Monitor agent unstable</p>
-				<p class="text-dim">[00:00:08] Waiting for input...</p>
-			</div>
-		</Panel>
-
-		<!-- Design System Preview -->
-		<Panel title="DESIGN TOKENS">
-			<div class="color-swatches">
-				<div class="swatch" style="background: var(--color-cyan)">
-					<span>Cyan</span>
+			<!-- Spec-Flow Preview -->
+			<Panel title="SPEC-FLOW STUDIO" glow>
+				<div class="spec-preview">
+					<div class="preview-placeholder">
+						<span class="icon">◈</span>
+						<p>Connecting to Spec-Flow Studio...</p>
+						<span class="status">Waiting for connection</span>
+					</div>
 				</div>
-				<div class="swatch" style="background: var(--color-blue)">
-					<span>Blue</span>
-				</div>
-				<div class="swatch" style="background: var(--color-green)">
-					<span>Green</span>
-				</div>
-				<div class="swatch" style="background: var(--color-orange)">
-					<span>Orange</span>
-				</div>
-				<div class="swatch" style="background: var(--color-red)">
-					<span>Red</span>
-				</div>
-			</div>
-		</Panel>
-	</main>
-
-	<!-- Footer -->
-	<footer class="console-footer">
-		<span class="text-dim font-mono">AETHER CONSOLE v0.0.1</span>
-		<span class="text-cyan">●</span>
-		<span class="text-dim font-mono">SvelteKit + PWA</span>
-	</footer>
-</div>
+			</Panel>
+		</aside>
+	</div>
+</ConsoleLayout>
 
 <style>
-	.console-container {
-		min-height: 100vh;
-		padding: var(--space-lg);
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-xl);
-	}
-
-	/* Header */
-	.console-header {
-		text-align: center;
-		padding: var(--space-xl) 0;
-	}
-
-	.console-header :global(h1) {
-		font-size: 3rem;
-		letter-spacing: 0.2em;
-		margin-bottom: var(--space-sm);
-	}
-
-	.subtitle {
-		color: var(--color-text-dim);
-		text-transform: uppercase;
-		letter-spacing: 0.3em;
-		font-size: 0.875rem;
-	}
-
-	/* Main Grid */
-	.console-grid {
+	.dashboard-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		grid-template-columns: 1fr 380px;
 		gap: var(--space-lg);
-		flex: 1;
+		height: 100%;
 	}
 
-	/* Agent List */
-	.agent-list {
+	/* Agents Section */
+	.agents-section {
 		display: flex;
 		flex-direction: column;
+	}
+
+	.agents-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 		gap: var(--space-md);
 	}
 
-	.agent-item {
-		padding: var(--space-sm) 0;
-		border-bottom: 1px solid var(--color-border);
-	}
-
-	.agent-item:last-child {
-		border-bottom: none;
-	}
-
-	/* System Info */
-	.system-info {
+	/* Sidebar */
+	.sidebar {
 		display: flex;
 		flex-direction: column;
+		gap: var(--space-lg);
+	}
+
+	/* Metrics Grid */
+	.metrics-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
 		gap: var(--space-sm);
 	}
 
-	.info-row {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
+	.metric-card {
+		background: rgba(0, 0, 0, 0.2);
+		padding: var(--space-md);
+		border-radius: var(--radius-md);
+		text-align: center;
 	}
 
-	.info-label {
-		font-size: 0.75rem;
+	.metric-card .metric-value {
+		display: block;
+		font-size: 1.5rem;
+		font-weight: 600;
+		font-family: var(--font-mono);
+	}
+
+	.metric-card .metric-label {
+		font-size: 0.65rem;
 		color: var(--color-text-dim);
 		text-transform: uppercase;
-		letter-spacing: 0.1em;
+		letter-spacing: 0.05em;
 	}
 
-	.info-value {
-		font-size: 0.875rem;
+	/* Spec Preview */
+	.spec-preview {
+		min-height: 120px;
 	}
 
-	/* Console Output */
-	.console-output {
-		font-size: 0.8rem;
-		line-height: 1.8;
-	}
-
-	.console-output p {
-		margin: 0;
-	}
-
-	/* Color Swatches */
-	.color-swatches {
+	.preview-placeholder {
 		display: flex;
-		gap: var(--space-sm);
-		flex-wrap: wrap;
-	}
-
-	.swatch {
-		width: 60px;
-		height: 60px;
-		border-radius: var(--radius-md);
-		display: flex;
-		align-items: flex-end;
-		justify-content: center;
-		padding: var(--space-xs);
-		box-shadow: 0 0 10px currentColor;
-	}
-
-	.swatch span {
-		font-size: 0.6rem;
-		text-transform: uppercase;
-		color: var(--color-bg-primary);
-		font-weight: 600;
-	}
-
-	/* Footer */
-	.console-footer {
-		display: flex;
-		justify-content: center;
+		flex-direction: column;
 		align-items: center;
-		gap: var(--space-md);
-		padding: var(--space-md) 0;
-		border-top: 1px solid var(--color-border);
-		font-size: 0.75rem;
+		justify-content: center;
+		height: 100%;
+		text-align: center;
+		color: var(--color-text-dim);
+	}
+
+	.preview-placeholder .icon {
+		font-size: 2rem;
+		color: var(--color-cyan);
+		opacity: 0.5;
+		margin-bottom: var(--space-sm);
+		animation: pulse 2s infinite;
+	}
+
+	.preview-placeholder p {
+		font-size: 0.8rem;
+		margin: 0 0 var(--space-xs);
+	}
+
+	.preview-placeholder .status {
+		font-size: 0.65rem;
+		font-family: var(--font-mono);
+		color: var(--color-cyan);
+		opacity: 0.7;
+	}
+
+	@keyframes pulse {
+		0%, 100% { opacity: 0.5; }
+		50% { opacity: 1; }
+	}
+
+	/* Responsive */
+	@media (max-width: 1024px) {
+		.dashboard-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.sidebar {
+			order: -1;
+		}
 	}
 </style>
