@@ -32,4 +32,9 @@
 - [x] エージェント状態管理
 - [x] WebSocket/SSE接続
 - [x] 提案統合機能
-- [ ] Spec-Flow Studio連携
+- [ ] Spec-Flow Studio連携（別プロジェクト完成後）
+
+## Future: Spec-Flow Studio
+
+> 別プロジェクトとして開発予定
+
