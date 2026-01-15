@@ -29,7 +29,11 @@
 		userInput = '';
 
 		try {
-			await agentExecutor.execute(selectedAgent, input, settings.selectedModel);
+			if (settings.streamingEnabled) {
+				await agentExecutor.executeStream(selectedAgent, input, settings.selectedModel);
+			} else {
+				await agentExecutor.execute(selectedAgent, input, settings.selectedModel);
+			}
 		} catch (error) {
 			// エラーはstore経由で表示
 		}
@@ -51,7 +55,7 @@
 			<small>右上の ⚙️ ボタンから設定</small>
 		</div>
 	{:else}
-		<div class="chat-header">
+			<div class="chat-header">
 			<div class="row">
 				<select class="agent-select" bind:value={selectedAgent} disabled={executorState.isRunning}>
 					{#each agents as agent}
@@ -74,6 +78,15 @@
 						{/each}
 					{/if}
 				</select>
+				<label class="stream-toggle" title="ストリーミング応答">
+					<input 
+						type="checkbox" 
+						checked={settings.streamingEnabled}
+						onchange={() => settingsStore.setStreaming(!settings.streamingEnabled)}
+						disabled={executorState.isRunning}
+					/>
+					<span class="toggle-icon">{settings.streamingEnabled ? '⚡' : '📦'}</span>
+				</label>
 			</div>
 		</div>
 
@@ -175,6 +188,29 @@
 
 	.model-select {
 		width: 160px;
+	}
+
+	.stream-toggle {
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+		padding: var(--space-xs) var(--space-sm);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-bg-primary);
+		transition: all var(--transition-fast);
+	}
+
+	.stream-toggle:hover {
+		border-color: var(--color-cyan);
+	}
+
+	.stream-toggle input {
+		display: none;
+	}
+
+	.toggle-icon {
+		font-size: 1rem;
 	}
 
 	.chat-header select {

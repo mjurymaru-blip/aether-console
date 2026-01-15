@@ -30,6 +30,6 @@
 
 - [x] AIエージェント実行基盤
 - [x] エージェント状態管理
-- [ ] WebSocket/SSE接続
+- [x] WebSocket/SSE接続
 - [ ] 提案統合機能
 - [ ] Spec-Flow Studio連携

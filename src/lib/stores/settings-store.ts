@@ -21,6 +21,7 @@ interface Settings {
     availableModels: ModelInfo[];
     isLoadingModels: boolean;
     modelError: string | null;
+    streamingEnabled: boolean;
 }
 
 // ブラウザ環境でのみsessionStorageをチェック
@@ -72,7 +73,8 @@ function createSettingsStore() {
         apiKeyReady: false,
         availableModels: [],
         isLoadingModels: false,
-        modelError: null
+        modelError: null,
+        streamingEnabled: true
     });
 
     return {
@@ -119,6 +121,10 @@ function createSettingsStore() {
                     await createSettingsStore().loadModels();
                 }
             }
+        },
+        // ストリーミング設定
+        setStreaming: (enabled: boolean) => {
+            update(s => ({ ...s, streamingEnabled: enabled }));
         }
     };
 }

@@ -4,7 +4,7 @@
  */
 
 import { writable, get } from 'svelte/store';
-import { callGemini, isApiKeyAvailable, type AgentMessage, type AgentConfig } from './gemini-client';
+import { callGemini, callGeminiStream, isApiKeyAvailable, type AgentMessage, type AgentConfig } from './gemini-client';
 import { agentStore, logStore } from './simulation';
 import { agents as agentDefinitions } from '../data/agents';
 import type { Agent } from '../types/agent';
@@ -152,6 +152,85 @@ ${agent.constraints.map(c => `- ${c}`).join('\n')}
                     throw error;
                 }
 
+                const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+
+                update(s => ({ ...s, error: errorMessage, isRunning: false }));
+
+                // エージェント状態を更新
+                agentStore.updateState(agentName, { status: 'error', currentTask: 'エラー発生' });
+
+                // ログに記録
+                logStore.add({
+                    level: 'error',
+                    source: agent.displayName,
+                    message: `エラー: ${errorMessage}`
+                });
+
+                throw error;
+            }
+        },
+
+        // ストリーミング実行（リアルタイム応答）
+        executeStream: async (agentName: string, input: string, model?: string): Promise<string> => {
+            const agent = agentDefinitions.find(a => a.name === agentName);
+            if (!agent) {
+                throw new Error(`エージェント ${agentName} が見つかりません`);
+            }
+
+            if (!isApiKeyAvailable()) {
+                throw new Error('APIキーが設定されていません');
+            }
+
+            update(s => ({ ...s, isRunning: true, currentAgent: agentName, response: '', error: null }));
+
+            // エージェント状態を更新
+            agentStore.updateState(agentName, { status: 'active', currentTask: '応答中...' });
+
+            // ログに記録
+            logStore.add({
+                level: 'info',
+                source: agent.displayName,
+                message: `タスク開始: ${input.substring(0, 50)}...`
+            });
+
+            const config: AgentConfig = {
+                systemPrompt: buildSystemPrompt(agent),
+                temperature: 0.7,
+                maxTokens: 1024
+            };
+
+            const messages: AgentMessage[] = [
+                { role: 'user', content: input }
+            ];
+
+            let fullResponse = '';
+
+            try {
+                for await (const chunk of callGeminiStream(messages, config, model)) {
+                    fullResponse += chunk;
+                    update(s => ({ ...s, response: fullResponse }));
+                }
+
+                // エージェント状態を更新
+                agentStore.updateState(agentName, {
+                    status: 'idle',
+                    currentTask: undefined,
+                    metrics: {
+                        ...agent.state.metrics,
+                        tasksCompleted: agent.state.metrics.tasksCompleted + 1
+                    }
+                });
+
+                // ログに記録
+                logStore.add({
+                    level: 'success',
+                    source: agent.displayName,
+                    message: 'タスク完了'
+                });
+
+                update(s => ({ ...s, isRunning: false }));
+                return fullResponse;
+            } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : '不明なエラー';
 
                 update(s => ({ ...s, error: errorMessage, isRunning: false }));
