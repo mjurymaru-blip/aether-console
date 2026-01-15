@@ -8,6 +8,7 @@
 	import SpecPatcher from '$lib/components/SpecPatcher.svelte';
 	import DiffVisualizer from '$lib/components/DiffVisualizer.svelte';
 	import AgentChat from '$lib/components/AgentChat.svelte';
+	import ProposalPanel from '$lib/components/ProposalPanel.svelte';
 	import ApiKeyDialog from '$lib/components/ApiKeyDialog.svelte';
 	import { agentStore, logStore } from '$lib/stores/simulation';
 
@@ -92,7 +93,12 @@
 						<span class="metric-value text-red">{errorCount}</span>
 						<span class="metric-label">Errors</span>
 					</div>
-				</div>
+					</div>
+			</Panel>
+
+			<!-- Integrated Proposal -->
+			<Panel title="INTEGRATED PROPOSAL" variant="corner" glow>
+				<ProposalPanel />
 			</Panel>
 		</section>
 

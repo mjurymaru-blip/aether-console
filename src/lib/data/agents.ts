@@ -97,6 +97,29 @@ export const agents: Agent[] = [
                 errorRate: 0.05
             }
         }
+    },
+    {
+        name: 'synthesizer',
+        displayName: 'Synthesizer',
+        description: '複数エージェントの出力を統合し、最終提案を生成',
+        icon: '◎',
+        role: '各エージェント（Analyzer, Predictor, Monitor, Planner）からの出力を統合し、包括的な最終提案を生成する。矛盾点を調整し、優先順位をつけて提示する。',
+        capabilities: ['output-synthesis', 'conflict-resolution', 'priority-ranking'],
+        constraints: ['全エージェントの出力を尊重する', '重要な情報を省略しない', '矛盾点は明示する'],
+        communication: {
+            canSendTo: [],
+            canReceiveFrom: ['analyzer', 'predictor', 'monitor', 'planner']
+        },
+        state: {
+            agentName: 'synthesizer',
+            status: 'idle',
+            lastActivity: new Date(),
+            metrics: {
+                tasksCompleted: 0,
+                averageResponseTime: '4.0s',
+                errorRate: 0.0
+            }
+        }
     }
 ];
 
