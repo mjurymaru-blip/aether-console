@@ -39,6 +39,8 @@ function createAgentStore() {
 }
 
 // メッセージ履歴
+const MAX_MESSAGES = 100;
+
 function createMessageStore() {
     const { subscribe, set, update } = writable<Message[]>([]);
     let messageId = 0;
@@ -50,19 +52,25 @@ function createMessageStore() {
             messageId = 0;
         },
         add: (message: Omit<Message, 'id' | 'timestamp'>) => {
-            update(messages => [
-                ...messages,
-                {
-                    ...message,
-                    id: `msg-${++messageId}`,
-                    timestamp: new Date()
-                } as Message
-            ]);
+            update(messages => {
+                const newMessages = [
+                    ...messages,
+                    {
+                        ...message,
+                        id: `msg-${++messageId}`,
+                        timestamp: new Date()
+                    } as Message
+                ];
+                // 上限を超えたら古いものを削除
+                return newMessages.slice(-MAX_MESSAGES);
+            });
         }
     };
 }
 
 // ログ
+const MAX_LOGS = 500;
+
 function createLogStore() {
     const { subscribe, set, update } = writable<LogEntry[]>([]);
 
@@ -72,7 +80,11 @@ function createLogStore() {
         add: (entry: Omit<LogEntry, 'timestamp'>) => {
             const now = new Date();
             const timestamp = now.toLocaleTimeString('ja-JP', { hour12: false });
-            update(logs => [...logs, { ...entry, timestamp }]);
+            update(logs => {
+                const newLogs = [...logs, { ...entry, timestamp }];
+                // 上限を超えたら古いものを削除
+                return newLogs.slice(-MAX_LOGS);
+            });
         }
     };
 }

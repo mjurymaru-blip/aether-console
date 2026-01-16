@@ -30,9 +30,14 @@ let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
 function createStudioConnectionStore() {
+    // デフォルトはwss://（セキュア）、ローカル開発時は設定で上書き可能
+    const defaultUrl = typeof window !== 'undefined' && window.location.protocol === 'https:'
+        ? 'wss://localhost:3001/api/ws'
+        : 'ws://localhost:3001/api/ws';
+
     const { subscribe, set, update } = writable<StudioConnectionState>({
         status: 'disconnected',
-        studioUrl: 'ws://localhost:3001/api/ws',
+        studioUrl: defaultUrl,
         autoSync: false,
         lastError: null,
         lastSyncTime: null

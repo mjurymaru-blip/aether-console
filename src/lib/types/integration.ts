@@ -112,9 +112,10 @@ export interface IntegrationConfig {
 
 /**
  * デフォルトの連携設定
+ * Note: 本番環境ではwss://を使用、ローカル開発ではws://を上書き可能
  */
 export const DEFAULT_INTEGRATION_CONFIG: IntegrationConfig = {
-    studioUrl: 'ws://localhost:3001/api/ws',
+    studioUrl: 'wss://localhost:3001/api/ws',
     autoSync: false,
     syncInterval: 5000
 };
