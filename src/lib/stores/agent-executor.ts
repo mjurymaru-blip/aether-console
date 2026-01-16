@@ -9,12 +9,22 @@ import { agentStore, logStore } from './simulation';
 import { agents as agentDefinitions } from '../data/agents';
 import type { Agent } from '../types/agent';
 
+interface ChatMessage {
+    role: 'user' | 'assistant';
+    content: string;
+    timestamp: Date;
+    agentName?: string;
+}
+
 interface AgentExecutionState {
     isRunning: boolean;
     currentAgent: string | null;
     response: string;
     error: string | null;
+    history: ChatMessage[];
 }
+
+const MAX_HISTORY = 50;
 
 // AbortControllerを保持
 let currentAbortController: AbortController | null = null;
@@ -24,7 +34,8 @@ function createAgentExecutorStore() {
         isRunning: false,
         currentAgent: null,
         response: '',
-        error: null
+        error: null,
+        history: []
     });
 
     // エージェントのシステムプロンプトを生成
@@ -121,7 +132,17 @@ ${agent.constraints.map(c => `- ${c}`).join('\n')}
 
                 const response = await callGemini(messages, config, model, currentAbortController.signal);
 
-                update(s => ({ ...s, response, isRunning: false }));
+                // 履歴に追加
+                update(s => ({
+                    ...s,
+                    response,
+                    isRunning: false,
+                    history: [
+                        ...s.history,
+                        { role: 'user' as const, content: input, timestamp: new Date(), agentName },
+                        { role: 'assistant' as const, content: response, timestamp: new Date(), agentName }
+                    ].slice(-MAX_HISTORY)
+                }));
 
                 // エージェント状態を更新
                 agentStore.updateState(agentName, {
@@ -228,7 +249,16 @@ ${agent.constraints.map(c => `- ${c}`).join('\n')}
                     message: 'タスク完了'
                 });
 
-                update(s => ({ ...s, isRunning: false }));
+                // 履歴に追加
+                update(s => ({
+                    ...s,
+                    isRunning: false,
+                    history: [
+                        ...s.history,
+                        { role: 'user' as const, content: input, timestamp: new Date(), agentName },
+                        { role: 'assistant' as const, content: fullResponse, timestamp: new Date(), agentName }
+                    ].slice(-MAX_HISTORY)
+                }));
                 return fullResponse;
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : '不明なエラー';
@@ -259,7 +289,8 @@ ${agent.constraints.map(c => `- ${c}`).join('\n')}
                 isRunning: false,
                 currentAgent: null,
                 response: '',
-                error: null
+                error: null,
+                history: []
             });
         }
     };

@@ -5,22 +5,33 @@
     <GlitchText text="AETHER CONSOLE" />
 -->
 <script lang="ts">
+	import { settingsStore } from "$lib/stores/settings-store";
+
 	interface Props {
 		text: string;
-		tag?: 'h1' | 'h2' | 'h3' | 'h4' | 'span' | 'p';
+		tag?: "h1" | "h2" | "h3" | "h4" | "span" | "p";
 		glitchOnHover?: boolean;
-		intensity?: 'low' | 'medium' | 'high';
+		intensity?: "low" | "medium" | "high";
 	}
 
-	let { text, tag = 'span', glitchOnHover = true, intensity = 'medium' } = $props<Props>();
+	let {
+		text,
+		tag = "span",
+		glitchOnHover = true,
+		intensity = "medium",
+	} = $props<Props>();
+	let settings = $derived($settingsStore);
+
+	// reducedMotionの場合はグリッチを無効化
+	let effectiveGlitch = $derived(glitchOnHover && !settings.reducedMotion);
 </script>
 
-<svelte:element 
+<svelte:element
 	this={tag}
 	class="glitch-text"
-	class:glitch-hover={glitchOnHover}
-	class:intensity-low={intensity === 'low'}
-	class:intensity-high={intensity === 'high'}
+	class:glitch-hover={effectiveGlitch}
+	class:intensity-low={intensity === "low"}
+	class:intensity-high={intensity === "high"}
 	data-text={text}
 >
 	{text}
@@ -83,26 +94,59 @@
 	}
 
 	@keyframes glitch {
-		0%, 100% { transform: translate(0); }
-		20% { transform: translate(-2px, 2px); }
-		40% { transform: translate(2px, -2px); }
-		60% { transform: translate(-1px, 1px); }
-		80% { transform: translate(1px, -1px); }
+		0%,
+		100% {
+			transform: translate(0);
+		}
+		20% {
+			transform: translate(-2px, 2px);
+		}
+		40% {
+			transform: translate(2px, -2px);
+		}
+		60% {
+			transform: translate(-1px, 1px);
+		}
+		80% {
+			transform: translate(1px, -1px);
+		}
 	}
 
 	@keyframes glitch-offset-1 {
-		0%, 100% { transform: translate(0); }
-		20% { transform: translate(2px, -1px); }
-		40% { transform: translate(-2px, 1px); }
-		60% { transform: translate(1px, 2px); }
-		80% { transform: translate(-1px, -2px); }
+		0%,
+		100% {
+			transform: translate(0);
+		}
+		20% {
+			transform: translate(2px, -1px);
+		}
+		40% {
+			transform: translate(-2px, 1px);
+		}
+		60% {
+			transform: translate(1px, 2px);
+		}
+		80% {
+			transform: translate(-1px, -2px);
+		}
 	}
 
 	@keyframes glitch-offset-2 {
-		0%, 100% { transform: translate(0); }
-		20% { transform: translate(-1px, 2px); }
-		40% { transform: translate(1px, -2px); }
-		60% { transform: translate(2px, -1px); }
-		80% { transform: translate(-2px, 1px); }
+		0%,
+		100% {
+			transform: translate(0);
+		}
+		20% {
+			transform: translate(-1px, 2px);
+		}
+		40% {
+			transform: translate(1px, -2px);
+		}
+		60% {
+			transform: translate(2px, -1px);
+		}
+		80% {
+			transform: translate(-2px, 1px);
+		}
 	}
 </style>

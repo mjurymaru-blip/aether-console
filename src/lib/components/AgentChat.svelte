@@ -2,17 +2,17 @@
   AgentChat.svelte - エージェントとのチャットパネル
 -->
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { agentExecutor } from '$lib/stores/agent-executor';
-	import { agentStore } from '$lib/stores/simulation';
-	import { settingsStore } from '$lib/stores/settings-store';
+	import { onMount } from "svelte";
+	import { agentExecutor } from "$lib/stores/agent-executor";
+	import { agentStore } from "$lib/stores/simulation";
+	import { settingsStore } from "$lib/stores/settings-store";
 
 	let agents = $derived($agentStore);
 	let executorState = $derived($agentExecutor);
 	let settings = $derived($settingsStore);
 
-	let selectedAgent = $state('analyzer');
-	let userInput = $state('');
+	let selectedAgent = $state("analyzer");
+	let userInput = $state("");
 
 	// クライアント側で初期化＋モデル一覧取得
 	onMount(async () => {
@@ -26,13 +26,21 @@
 		if (!userInput.trim() || executorState.isRunning) return;
 
 		const input = userInput;
-		userInput = '';
+		userInput = "";
 
 		try {
 			if (settings.streamingEnabled) {
-				await agentExecutor.executeStream(selectedAgent, input, settings.selectedModel);
+				await agentExecutor.executeStream(
+					selectedAgent,
+					input,
+					settings.selectedModel,
+				);
 			} else {
-				await agentExecutor.execute(selectedAgent, input, settings.selectedModel);
+				await agentExecutor.execute(
+					selectedAgent,
+					input,
+					settings.selectedModel,
+				);
 			}
 		} catch (error) {
 			// エラーはstore経由で表示
@@ -40,7 +48,7 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
-		if (event.key === 'Enter' && !event.shiftKey) {
+		if (event.key === "Enter" && !event.shiftKey) {
 			event.preventDefault();
 			handleSubmit();
 		}
@@ -55,18 +63,26 @@
 			<small>右上の ⚙️ ボタンから設定</small>
 		</div>
 	{:else}
-			<div class="chat-header">
+		<div class="chat-header">
 			<div class="row">
-				<select class="agent-select" bind:value={selectedAgent} disabled={executorState.isRunning}>
+				<select
+					class="agent-select"
+					bind:value={selectedAgent}
+					disabled={executorState.isRunning}
+				>
 					{#each agents as agent}
 						<option value={agent.name}>{agent.displayName}</option>
 					{/each}
 				</select>
-				<select 
-					class="model-select" 
-					bind:value={settings.selectedModel} 
-					onchange={(e) => settingsStore.setModel((e.target as HTMLSelectElement).value)}
-					disabled={executorState.isRunning || settings.isLoadingModels}
+				<select
+					class="model-select"
+					bind:value={settings.selectedModel}
+					onchange={(e) =>
+						settingsStore.setModel(
+							(e.target as HTMLSelectElement).value,
+						)}
+					disabled={executorState.isRunning ||
+						settings.isLoadingModels}
 				>
 					{#if settings.isLoadingModels}
 						<option>読込中...</option>
@@ -79,36 +95,76 @@
 					{/if}
 				</select>
 				<label class="stream-toggle" title="ストリーミング応答">
-					<input 
-						type="checkbox" 
+					<input
+						type="checkbox"
 						checked={settings.streamingEnabled}
-						onchange={() => settingsStore.setStreaming(!settings.streamingEnabled)}
+						onchange={() =>
+							settingsStore.setStreaming(
+								!settings.streamingEnabled,
+							)}
 						disabled={executorState.isRunning}
 					/>
-					<span class="toggle-icon">{settings.streamingEnabled ? '⚡' : '📦'}</span>
+					<span class="toggle-icon"
+						>{settings.streamingEnabled ? "⚡" : "📦"}</span
+					>
 				</label>
 			</div>
 		</div>
 
 		<div class="chat-response">
-			{#if executorState.isRunning}
-				<div class="loading">
-					<span class="spinner">◇</span>
-					<span>思考中...</span>
-				</div>
-			{:else if executorState.error}
-				<div class="error">
-					<span class="icon">⚠️</span>
-					<span>{executorState.error}</span>
-				</div>
-			{:else if executorState.response}
-				<div class="response">
-					<pre>{executorState.response}</pre>
-				</div>
-			{:else}
+			{#if executorState.history.length === 0 && !executorState.isRunning && !executorState.response}
 				<div class="placeholder">
 					<span class="icon">◈</span>
 					<p>エージェントにタスクを与えてください</p>
+				</div>
+			{:else}
+				<div class="chat-history">
+					{#each executorState.history as message}
+						<div class="message {message.role}">
+							<div class="message-header">
+								<span class="role"
+									>{message.role === "user"
+										? "👤 You"
+										: "🤖 " +
+											(message.agentName ||
+												"Agent")}</span
+								>
+								<span class="time"
+									>{message.timestamp.toLocaleTimeString(
+										"ja-JP",
+										{ hour12: false },
+									)}</span
+								>
+							</div>
+							<div class="message-content">
+								<pre>{message.content}</pre>
+							</div>
+						</div>
+					{/each}
+					{#if executorState.isRunning}
+						<div class="message assistant">
+							<div class="message-header">
+								<span class="role"
+									>🤖 {executorState.currentAgent ||
+										"Agent"}</span
+								>
+								<span class="loading-indicator">
+									<span class="spinner">◇</span> 思考中...
+								</span>
+							</div>
+							{#if executorState.response}
+								<div class="message-content streaming">
+									<pre>{executorState.response}</pre>
+								</div>
+							{/if}
+						</div>
+					{/if}
+				</div>
+			{/if}
+			{#if executorState.error}
+				<div class="error">
+					<span class="icon">⚠️</span>
+					<span>{executorState.error}</span>
 				</div>
 			{/if}
 		</div>
@@ -249,8 +305,12 @@
 	}
 
 	@keyframes spin {
-		from { transform: rotate(0deg); }
-		to { transform: rotate(360deg); }
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	.error {
@@ -269,6 +329,67 @@
 		font-family: var(--font-mono);
 		font-size: 0.8rem;
 		line-height: 1.6;
+	}
+
+	.chat-history {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-md);
+	}
+
+	.message {
+		padding: var(--space-sm);
+		border-radius: var(--radius-sm);
+		border-left: 3px solid;
+	}
+
+	.message.user {
+		background: rgba(0, 255, 255, 0.05);
+		border-left-color: var(--color-cyan);
+	}
+
+	.message.assistant {
+		background: rgba(128, 255, 128, 0.05);
+		border-left-color: var(--color-green);
+	}
+
+	.message-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: var(--space-xs);
+	}
+
+	.message-header .role {
+		font-size: 0.75rem;
+		font-weight: bold;
+	}
+
+	.message-header .time {
+		font-size: 0.65rem;
+		color: var(--color-text-dim);
+	}
+
+	.message-content pre {
+		margin: 0;
+		white-space: pre-wrap;
+		word-break: break-word;
+		font-family: var(--font-mono);
+		font-size: 0.75rem;
+		line-height: 1.5;
+	}
+
+	.message-content.streaming pre {
+		border-left: 2px solid var(--color-cyan);
+		padding-left: var(--space-sm);
+	}
+
+	.loading-indicator {
+		display: flex;
+		align-items: center;
+		gap: var(--space-xs);
+		font-size: 0.7rem;
+		color: var(--color-cyan);
 	}
 
 	.placeholder {
@@ -351,7 +472,12 @@
 	}
 
 	@keyframes pulse-cancel {
-		0%, 100% { opacity: 1; }
-		50% { opacity: 0.7; }
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.7;
+		}
 	}
 </style>

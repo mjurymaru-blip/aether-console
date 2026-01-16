@@ -22,6 +22,7 @@ interface Settings {
     isLoadingModels: boolean;
     modelError: string | null;
     streamingEnabled: boolean;
+    reducedMotion: boolean;
 }
 
 // ブラウザ環境でのみsessionStorageをチェック
@@ -68,13 +69,19 @@ async function fetchAvailableModels(apiKey: string): Promise<ModelInfo[]> {
 }
 
 function createSettingsStore() {
+    // システムのアニメーション設定を確認
+    const prefersReducedMotion = browser
+        ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        : false;
+
     const { subscribe, set, update } = writable<Settings>({
         selectedModel: '',
         apiKeyReady: false,
         availableModels: [],
         isLoadingModels: false,
         modelError: null,
-        streamingEnabled: true
+        streamingEnabled: true,
+        reducedMotion: prefersReducedMotion
     });
 
     return {
@@ -125,6 +132,10 @@ function createSettingsStore() {
         // ストリーミング設定
         setStreaming: (enabled: boolean) => {
             update(s => ({ ...s, streamingEnabled: enabled }));
+        },
+        // 視覚効果軽減設定
+        setReducedMotion: (reduced: boolean) => {
+            update(s => ({ ...s, reducedMotion: reduced }));
         }
     };
 }
