@@ -58,6 +58,29 @@ function createAppliedPatchesStore() {
         },
         isApplied: (patchId: string): boolean => {
             return get({ subscribe }).some(p => p.id === patchId);
+        },
+        // Studioから受信したパッチを追加（適用済みとしてマーク）
+        addFromStudio: (patch: PredefinedPatch) => {
+            update(patches => {
+                // 既に存在するならスキップ
+                if (patches.some(p => p.id === patch.id)) {
+                    return patches;
+                }
+
+                // パッチのdiffを適用
+                patch.diffs.forEach(diff => {
+                    applyDiff(diff);
+                });
+
+                // ログに記録
+                logStore.add({
+                    level: 'success',
+                    source: 'Studio',
+                    message: `Studioからパッチ受信: ${patch.name}`
+                });
+
+                return [...patches, patch];
+            });
         }
     };
 }

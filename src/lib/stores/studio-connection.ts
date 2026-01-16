@@ -160,8 +160,25 @@ function createStudioConnectionStore() {
                 break;
 
             case 'PATCH_CREATED':
-                // 新しいパッチが作成された
+                // 新しいパッチが作成された - Consoleに適用
                 console.log('Patch created:', event.patch);
+                // spec-diffストアにパッチを追加（トップレベルでimport済み）
+                appliedPatchesStore.addFromStudio({
+                    id: event.patch.id,
+                    name: event.patch.name,
+                    description: event.patch.description,
+                    icon: '🔄',
+                    category: 'capability',
+                    diffs: event.patch.diffs.map(d => ({
+                        agentName: d.agentName,
+                        operation: d.operation,
+                        path: d.path,
+                        before: d.before,
+                        after: d.after,
+                        description: d.description,
+                        impact: d.impact
+                    }))
+                });
                 break;
 
             case 'SCENARIO_CREATED':
