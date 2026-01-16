@@ -4,7 +4,8 @@
   NOC（ネットワークオペレーションセンター）風の固定グリッドレイアウト
 -->
 <script lang="ts">
-	import GlitchText from './GlitchText.svelte';
+	import GlitchText from "./GlitchText.svelte";
+	import StudioStatus from "./StudioStatus.svelte";
 
 	interface Props {
 		title?: string;
@@ -12,7 +13,12 @@
 		onSettingsClick?: () => void;
 	}
 
-	let { title = 'AETHER CONSOLE', subtitle = 'AI Operations Command Center', onSettingsClick, children } = $props<Props>();
+	let {
+		title = "AETHER CONSOLE",
+		subtitle = "AI Operations Command Center",
+		onSettingsClick,
+		children,
+	} = $props<Props>();
 
 	// 現在時刻（リアルタイム更新）
 	let currentTime = $state(new Date());
@@ -25,11 +31,15 @@
 	});
 
 	function formatTime(date: Date): string {
-		return date.toLocaleTimeString('ja-JP', { hour12: false });
+		return date.toLocaleTimeString("ja-JP", { hour12: false });
 	}
 
 	function formatDate(date: Date): string {
-		return date.toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' });
+		return date.toLocaleDateString("ja-JP", {
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+		});
 	}
 </script>
 
@@ -41,6 +51,7 @@
 				<span class="status-dot active"></span>
 				<span class="status-label">SYSTEM ONLINE</span>
 			</div>
+			<StudioStatus />
 		</div>
 		<div class="topbar-center">
 			<GlitchText text={title} tag="h1" intensity="medium" />
@@ -101,7 +112,11 @@
 		grid-template-columns: 1fr auto 1fr;
 		align-items: center;
 		padding: var(--space-md) var(--space-lg);
-		background: linear-gradient(180deg, rgba(0, 255, 255, 0.05) 0%, transparent 100%);
+		background: linear-gradient(
+			180deg,
+			rgba(0, 255, 255, 0.05) 0%,
+			transparent 100%
+		);
 		border-bottom: 1px solid var(--color-border);
 	}
 
@@ -238,8 +253,13 @@
 	}
 
 	@keyframes pulse {
-		0%, 100% { opacity: 1; }
-		50% { opacity: 0.5; }
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.5;
+		}
 	}
 
 	/* Responsive */
@@ -250,7 +270,8 @@
 			text-align: center;
 		}
 
-		.topbar-left, .topbar-right {
+		.topbar-left,
+		.topbar-right {
 			justify-content: center;
 		}
 
