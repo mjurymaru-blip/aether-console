@@ -17,45 +17,74 @@ SF風のAIオペレーションルーム — 複数のAIエージェントを可
 - **Vanilla CSS** (スタイリング)
 - **GitHub Pages** (デプロイ)
 
-## 開発
+## 利用方法
+
+### 1. インストール
 
 ```bash
-# 開発サーバー起動
-npm run dev
+git clone https://github.com/mjurymaru-blip/aether-console.git
+cd aether-console
+npm install
+```
 
-# ビルド
+### 2. 開発サーバー起動
+
+```bash
+npm run dev
+```
+
+ブラウザで http://localhost:5173 を開く
+
+### 3. APIキー設定
+
+1. 右上の ⚙️ ボタンをクリック
+2. Gemini APIキーを入力
+3. パスワードを設定して保存
+
+### 4. 機能を使う
+
+| 機能 | 説明 |
+|------|------|
+| **AI Agent Chat** | 個別エージェントとの対話 |
+| **Integrated Proposal** | 複数エージェントの統合分析 |
+| **Spec Patcher** | 仕様変更の適用 |
+| **Studio連携** | Spec-Flow Studioとの接続 |
+
+## プロジェクト構造
+
+```
+src/
+├── lib/
+│   ├── components/   # UIコンポーネント
+│   ├── stores/       # 状態管理
+│   ├── types/        # 型定義
+│   └── data/         # エージェント定義
+├── routes/           # ページ
+└── app.html          # HTMLテンプレート
+static/               # 静的ファイル
+```
+
+> **Note:** `docs/` と `.agent/` はプライベートリポジトリ（Gitea）のみに存在します。
+
+## ビルド
+
+```bash
+# 本番ビルド
 npm run build
 
 # プレビュー
 npm run preview
 ```
 
-## プロジェクト構造
+## Spec-Flow Studio連携
 
-```
-src/
-├── lib/          # 共有コンポーネント・ユーティリティ
-├── routes/       # ページ・ルーティング
-└── app.html      # HTMLテンプレート
+Spec-Flow StudioとWebSocketで連携し、仕様変更をリアルタイム同期できます。
 
-docs/
-├── task.md               # タスクリスト
-├── tech_stack.md         # 技術選定ドキュメント
-└── development_workflow.md  # 開発フロー
-
-.agent/workflows/         # Antigravityワークフロー
+```typescript
+// 接続先
+ws://localhost:3001/api/ws
 ```
 
-## ワークフローコマンド
+## ライセンス
 
-| コマンド | 説明 |
-|---------|------|
-| `/backup` | Giteaにバックアップ |
-| `/publish` | GitHubへ公開 |
-| `/review-feedback` | 外部AIレビュー結果を取り込む |
-| `/export-context` | repomixでエクスポート |
-
-## ドキュメント
-
-- [技術選定](docs/tech_stack.md)
-- [開発フロー](docs/development_workflow.md)
+MIT
